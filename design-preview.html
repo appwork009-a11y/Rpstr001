@@ -1,0 +1,279 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<title>Production Plan – Design Preview</title>
+<style>
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+  body { font-family: 'Segoe UI', sans-serif; background: #ecf0f1; display: flex; justify-content: center; align-items: center; min-height: 100vh; padding: 20px; }
+
+  .window {
+    width: 1180px;
+    border: 1px solid #7f8c8d;
+    box-shadow: 0 8px 32px rgba(0,0,0,0.28);
+    background: #fff;
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  /* ── Windows title bar ── */
+  .win-titlebar {
+    background: linear-gradient(to right, #2c3e50, #34495e);
+    height: 30px;
+    display: flex;
+    align-items: center;
+    padding: 0 10px;
+    justify-content: space-between;
+  }
+  .win-titlebar .win-title { color: #bdc3c7; font-size: 12px; }
+  .win-controls { display: flex; gap: 6px; }
+  .win-btn { width: 14px; height: 14px; border-radius: 50%; cursor: pointer; }
+  .win-btn.close  { background: #e74c3c; }
+  .win-btn.min    { background: #f39c12; }
+  .win-btn.max    { background: #2ecc71; }
+
+  /* ── App header bar ── */
+  .header {
+    background: #34495e;
+    height: 56px;
+    display: flex;
+    align-items: center;
+    padding: 0 16px;
+    gap: 16px;
+  }
+  .header-title { color: #fff; font-size: 20px; font-weight: 700; }
+  .header-date  { color: #bdc3c7; font-size: 13px; margin-left: 4px; flex: 1; }
+  .btn {
+    padding: 6px 18px;
+    border: none;
+    border-radius: 3px;
+    font-family: 'Segoe UI', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    cursor: pointer;
+    color: #fff;
+  }
+  .btn-refresh { background: #2980b9; }
+  .btn-export  { background: #27ae60; }
+
+  /* ── Grid wrapper ── */
+  .grid-wrap { overflow-x: auto; background: #fff; }
+
+  table {
+    width: 100%;
+    border-collapse: collapse;
+    font-size: 12.5px;
+  }
+
+  /* Band header row */
+  .band-row th {
+    color: #fff;
+    font-size: 12px;
+    font-weight: 700;
+    text-align: center;
+    padding: 6px 4px;
+    border-right: 2px solid #fff;
+    letter-spacing: 0.4px;
+  }
+  .band-id     { background: #2980b9; }
+  .band-sched  { background: #27ae60; }
+  .band-prod   { background: #8e44ad; }
+  .band-qty    { background: #e67e22; }
+  .band-perf   { background: #c0392b; }
+
+  /* Column header row */
+  .col-row th {
+    background: #2c3e50;
+    color: #ecf0f1;
+    font-size: 11.5px;
+    font-weight: 600;
+    text-align: center;
+    padding: 5px 6px;
+    border-right: 1px solid #4a6072;
+    border-bottom: 2px solid #7f8c8d;
+    white-space: nowrap;
+  }
+
+  /* Data rows */
+  tbody tr:nth-child(odd)  td { background: #fff; }
+  tbody tr:nth-child(even) td { background: #f0f8ff; }
+  tbody tr:hover td { background: #aed6f1 !important; }
+
+  tbody td {
+    padding: 5px 7px;
+    border-right: 1px solid #dce3e8;
+    border-bottom: 1px solid #e8ecef;
+    text-align: center;
+    color: #2c3e50;
+    white-space: nowrap;
+  }
+  tbody td.desc { text-align: left; }
+
+  /* Status badges */
+  .badge {
+    display: inline-block;
+    padding: 2px 10px;
+    border-radius: 10px;
+    font-size: 11px;
+    font-weight: 700;
+    color: #fff;
+    white-space: nowrap;
+  }
+  .badge-complete  { background: #27ae60; }
+  .badge-ontrack   { background: #2980b9; }
+  .badge-delayed   { background: #c0392b; }
+  .badge-pending   { background: #e67e22; }
+
+  /* Row indicator (like DevExpress grid indicator) */
+  .indicator { width: 16px; background: #ecf0f1; border-right: 1px solid #ccc; }
+  .indicator-active { background: #2980b9; }
+
+  /* Status bar */
+  .statusbar {
+    background: #ecf0f1;
+    border-top: 1px solid #bdc3c7;
+    padding: 4px 14px;
+    display: flex;
+    justify-content: space-between;
+    font-size: 11px;
+    color: #7f8c8d;
+  }
+</style>
+</head>
+<body>
+<div class="window">
+
+  <!-- Windows chrome -->
+  <div class="win-titlebar">
+    <span class="win-title">Production Plan</span>
+    <div class="win-controls">
+      <div class="win-btn min"></div>
+      <div class="win-btn max"></div>
+      <div class="win-btn close"></div>
+    </div>
+  </div>
+
+  <!-- App header -->
+  <div class="header">
+    <span class="header-title">Production Plan</span>
+    <span class="header-date">28 Mar 2026</span>
+    <button class="btn btn-refresh">Refresh</button>
+    <button class="btn btn-export">Export</button>
+  </div>
+
+  <!-- Grid -->
+  <div class="grid-wrap">
+    <table>
+      <!-- Band row -->
+      <thead>
+        <tr class="band-row">
+          <th style="width:16px; background:#2c3e50; border:none;"></th>
+          <th class="band-id"    colspan="3">Identification</th>
+          <th class="band-sched" colspan="3">Schedule</th>
+          <th class="band-prod"  colspan="3">Product</th>
+          <th class="band-qty"   colspan="3">Quantity</th>
+          <th class="band-perf"  colspan="3">Performance</th>
+        </tr>
+        <!-- Column header row -->
+        <tr class="col-row">
+          <th style="background:#2c3e50; border:none;"></th>
+          <th>#</th><th>Family</th><th>Line ID</th>
+          <th>Date</th><th>Shift</th><th>Team Leader</th>
+          <th>Product No</th><th>Description</th><th>UOM</th>
+          <th>Target</th><th>Actual</th><th>Defect</th>
+          <th>Efficiency %</th><th>Status</th><th>Remarks</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td class="indicator indicator-active"></td>
+          <td>1</td><td>Electronics</td><td>L-01</td>
+          <td>28/03/2026</td><td>Morning</td><td>Alice Wong</td>
+          <td>PRD-1001</td><td class="desc">PCB Assembly A</td><td>PCS</td>
+          <td>500</td><td>492</td><td>3</td>
+          <td>98.4%</td><td><span class="badge badge-ontrack">On Track</span></td><td></td>
+        </tr>
+        <tr>
+          <td class="indicator"></td>
+          <td>2</td><td>Electronics</td><td>L-01</td>
+          <td>28/03/2026</td><td>Afternoon</td><td>Bob Tan</td>
+          <td>PRD-1002</td><td class="desc">PCB Assembly B</td><td>PCS</td>
+          <td>450</td><td>450</td><td>0</td>
+          <td>100.0%</td><td><span class="badge badge-complete">Complete</span></td><td class="desc">Ahead of schedule</td>
+        </tr>
+        <tr>
+          <td class="indicator"></td>
+          <td>3</td><td>Electronics</td><td>L-02</td>
+          <td>28/03/2026</td><td>Morning</td><td>Carol Lim</td>
+          <td>PRD-1003</td><td class="desc">Sensor Module X1</td><td>PCS</td>
+          <td>300</td><td>210</td><td>12</td>
+          <td>70.0%</td><td><span class="badge badge-delayed">Delayed</span></td><td class="desc">Material shortage</td>
+        </tr>
+        <tr>
+          <td class="indicator"></td>
+          <td>4</td><td>Mechanical</td><td>L-03</td>
+          <td>28/03/2026</td><td>Night</td><td>David Ng</td>
+          <td>PRD-2001</td><td class="desc">Bracket Assembly</td><td>SET</td>
+          <td>200</td><td>198</td><td>2</td>
+          <td>99.0%</td><td><span class="badge badge-ontrack">On Track</span></td><td></td>
+        </tr>
+        <tr>
+          <td class="indicator"></td>
+          <td>5</td><td>Mechanical</td><td>L-03</td>
+          <td>28/03/2026</td><td>Morning</td><td>Eva Chen</td>
+          <td>PRD-2002</td><td class="desc">Frame Sub-Assy</td><td>SET</td>
+          <td>150</td><td>0</td><td>0</td>
+          <td>0.0%</td><td><span class="badge badge-pending">Pending</span></td><td class="desc">Waiting setup</td>
+        </tr>
+        <tr>
+          <td class="indicator"></td>
+          <td>6</td><td>Packaging</td><td>L-04</td>
+          <td>28/03/2026</td><td>Afternoon</td><td>Frank Ho</td>
+          <td>PRD-3001</td><td class="desc">Carton Box Pack</td><td>CTN</td>
+          <td>800</td><td>820</td><td>5</td>
+          <td>102.5%</td><td><span class="badge badge-complete">Complete</span></td><td></td>
+        </tr>
+        <tr>
+          <td class="indicator"></td>
+          <td>7</td><td>Electronics</td><td>L-02</td>
+          <td>29/03/2026</td><td>Morning</td><td>Grace Yeo</td>
+          <td>PRD-1004</td><td class="desc">Control Board Rev2</td><td>PCS</td>
+          <td>400</td><td>0</td><td>0</td>
+          <td>0.0%</td><td><span class="badge badge-pending">Pending</span></td><td></td>
+        </tr>
+        <tr>
+          <td class="indicator"></td>
+          <td>8</td><td>Mechanical</td><td>L-05</td>
+          <td>29/03/2026</td><td>Afternoon</td><td>Henry Koh</td>
+          <td>PRD-2003</td><td class="desc">Shaft Assy Type B</td><td>SET</td>
+          <td>120</td><td>0</td><td>0</td>
+          <td>0.0%</td><td><span class="badge badge-pending">Pending</span></td><td></td>
+        </tr>
+        <tr>
+          <td class="indicator"></td>
+          <td>9</td><td>Packaging</td><td>L-04</td>
+          <td>29/03/2026</td><td>Night</td><td>Irene Tay</td>
+          <td>PRD-3002</td><td class="desc">Blister Pack Std</td><td>PCS</td>
+          <td>600</td><td>0</td><td>0</td>
+          <td>0.0%</td><td><span class="badge badge-pending">Pending</span></td><td></td>
+        </tr>
+        <tr>
+          <td class="indicator"></td>
+          <td>10</td><td>Electronics</td><td>L-01</td>
+          <td>29/03/2026</td><td>Night</td><td>Jack Sim</td>
+          <td>PRD-1005</td><td class="desc">Power Supply Unit</td><td>PCS</td>
+          <td>250</td><td>0</td><td>0</td>
+          <td>0.0%</td><td><span class="badge badge-pending">Pending</span></td><td></td>
+        </tr>
+      </tbody>
+    </table>
+  </div>
+
+  <!-- Status bar -->
+  <div class="statusbar">
+    <span>10 records &nbsp;|&nbsp; 4 Complete &nbsp;|&nbsp; 2 On Track &nbsp;|&nbsp; 1 Delayed &nbsp;|&nbsp; 5 Pending</span>
+    <span>Production Plan v1.0</span>
+  </div>
+</div>
+</body>
+</html>
